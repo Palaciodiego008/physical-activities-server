@@ -70,16 +70,5 @@ go run main.go
 - **`/upload` (POST)**: Maneja la carga de archivos CSV.
 - **`/activities` (GET)**: Retorna las actividades sospechosas basadas en el archivo más reciente.
 
-## Detalles del Frontend
-
-### Estructura del Código
-
-- **`public/` y `src/`**: Directorios estándar de un proyecto React.js.
-
-### Componentes Principales
-
-- **`FileUpload`**: Componente para cargar archivos CSV.
-- **`SuspiciousActivities`**: Componente para mostrar las actividades sospechosas.
-
 ## Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
