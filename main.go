@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -177,23 +176,42 @@ func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
 // Modifica la función getActivitiesHandler para leer el archivo más reciente
 func getActivitiesHandler(w http.ResponseWriter, r *http.Request) {
 	// Obtener la lista de archivos en el directorio de carga
-	files, err := ioutil.ReadDir("./uploads")
+	dirEntries, err := os.ReadDir("./uploads")
 	if err != nil {
 		http.Error(w, "Error al obtener la lista de archivos", http.StatusInternalServerError)
 		return
 	}
 
+	// Estructura para almacenar información de archivos y su índice correspondiente
+	type fileInfo struct {
+		index int
+		info  os.FileInfo
+	}
+
+	// Crear una slice de fileInfo
+	var filesWithInfo []fileInfo
+
+	// Obtener información de cada archivo
+	for i, entry := range dirEntries {
+		info, err := entry.Info()
+		if err != nil {
+			http.Error(w, "Error al obtener información del archivo", http.StatusInternalServerError)
+			return
+		}
+		filesWithInfo = append(filesWithInfo, fileInfo{index: i, info: info})
+	}
+
 	// Ordenar los archivos por fecha de modificación (el más reciente primero)
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].ModTime().After(files[j].ModTime())
+	sort.Slice(filesWithInfo, func(i, j int) bool {
+		return filesWithInfo[i].info.ModTime().After(filesWithInfo[j].info.ModTime())
 	})
 
 	// Tomar el archivo más reciente
-	if len(files) == 0 {
+	if len(filesWithInfo) == 0 {
 		http.Error(w, "No hay archivos disponibles", http.StatusNotFound)
 		return
 	}
-	fileName := "./uploads/" + files[0].Name()
+	fileName := "./uploads/" + dirEntries[filesWithInfo[0].index].Name()
 
 	// Leer las actividades desde el archivo más reciente
 	activities, err := readActivities(fileName)
